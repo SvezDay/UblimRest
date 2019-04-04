@@ -1,16 +1,16 @@
 'use-strict';
 // CONFIG ----------------------------------------------------------------------
-const tokenGen = require('../../_services/token.service');
-const driver = require('../../../_dbconnect');
+const tokenGen = require('../../../services/token.service');
+const driver = require('path').join(__dirname, '_graphenedb');
 // LIB ---------------------------------------------------------------------
 const parser = require('parse-neo4j');
 const bluemise = require('bluebird');
 let socket = require('socket.io');
 // SERVICES --------------------------------------------------------------------
-const utils = require('../../_services/utils.service');
-const validator = require('../../_services/validator.service');
+const utils = require('../../../services/utils.service');
+const validator = require('../../../services/validator.service');
 // REQUEST ---------------------------------------------------------------------
-const miscellaneousReq = require('../../_services/miscellaneous.request');
+const miscellaneousReq = require('../../../services/miscellaneous.request');
 // COMMON ----------------------------------------------------------------------
 // CONTROLLER ------------------------------------------------------------------
 let createIndexRecall = require('./create-index-recall.ctrl').createIndexRecall;

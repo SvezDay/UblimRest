@@ -1,17 +1,17 @@
 'use-strict';
 // CONFIG ----------------------------------------------------------------------
-const tokenGen = require('../../_services/token.service');
-const driver = require('../../../_dbconnect');
+const tokenGen = require('../../../services/token.service');
+const driver = require('path').join(__dirname, '_graphenedb');
 // LIB ---------------------------------------------------------------------
 const parser = require('parse-neo4j');
 // SERVICES --------------------------------------------------------------------
-const utils = require('../../_services/utils.service');
-const validator = require('../../_services/validator.service');
-let miscellaneous = require('../../_services/miscellaneous.request');
-let graphReq = require('../../_services/graph.request');
+const utils = require('../../../services/utils.service');
+const validator = require('../../../services/validator.service');
+let miscellaneous = require('../../../services/miscellaneous.request');
+let graphReq = require('../../../services/graph.request');
 // REQUEST ---------------------------------------------------------------------
 // COMMON ----------------------------------------------------------------------
-// let commonData = require('../_models/common.data');
+// let commonData = require('../models/common.data');
 // CONTROLLER ------------------------------------------------------------------
 let deleteRecall = require('./delete-recall.ctrl').deleteRecall;
 let getCombinations = require('./create-recall.ctrl');
@@ -28,14 +28,14 @@ module.exports.getRecalls = (tx, idx_uuid)=>{
     .then(recalls => resolve(recalls[0]) )
     .catch(err =>{console.log(err); reject({status: err.status || 400, mess: err.mess || 'game-recall-one/maj.ctrl.js/getRecalls'}); })
   })
-}
+};
 
 module.exports.updateRecall = (tx, uid, idx_uuid, note_uuid, code_label)=> { // Input: comb:{q,a}  |  Output: void
     return new Promise((resolve, reject)=>{
       let now = new Date().getTime();
       let recalls = [];
       let combinations = [];
-      let newCombinations= [];
+      let newCombinations;
 
       this.deleteRecall(tx, ps.note_uuid)
       .then(() => this.getRecall(tx, idx_uuid) )
@@ -46,7 +46,7 @@ module.exports.updateRecall = (tx, uid, idx_uuid, note_uuid, code_label)=> { // 
         for(var i=0; combinations.length; i++){
           let exist=false;
           for(var j=0; recalls.length; j++){
-            if((combinations[i].q == recalls[j].q && combinations[i].a == recalls[j].a)){
+            if((combinations[i].q === recalls[j].q && combinations[i].a === recalls[j].a)){
               exist=true;
             }
           }

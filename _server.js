@@ -51,41 +51,41 @@ let server = app.listen(port);
 
 // ====================================================== CORS
 
-let allowCrossDomain = (req, res, next)=>{
-   res.header("Access-Control-Allow-Origin", "http://localhost:8100", "https://ublimpwa.firebaseapp.com");
-   res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE");
-   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization, X-Auth-Token, x-access-token");
-   next();
+let allowCrossDomain = (req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "http://localhost:8100", "https://ublimpwa.firebaseapp.com");
+    res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization, X-Auth-Token, x-access-token");
+    next();
 };
 let whitelist = ["http://localhost:4200", "http://localhost:5000", "https://rudlabquickapp2.herokuapp.com"];
 
 let corsOptions = {
-  origin: (origin, callback)=>{
-    if(origin === undefined){
-      callback(null, true) ;
-    } else if(whitelist.indexOf(origin) !== -1){
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
+    origin: (origin, callback) => {
+        if (origin === undefined) {
+            callback(null, true);
+        } else if (whitelist.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
     }
-  }
 };
 
 // ======================================================== ERROR HANDLE
 
 // return error message for unauthorized requests
 let handleError = (err, req, res, next) => {
-  if (err.name === 'UnauthorizedError') {
-    res.status(401).json({message:'Missing or invalid token'});
-  }
-  // res.status(500).json(err)
+    if (err.name === 'UnauthorizedError') {
+        res.status(401).json({message: 'Missing or invalid token'});
+    }
+    // res.status(500).json(err)
 };
 
 // ======================================================== EXPRESS APP CONFIG
 
 // app.use({$$DIRNAME:_dirname})
 app.use(morgan('dev'));
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 // app.use(favicon(path.join(__dirname, 'favicon.ico')));
 
@@ -109,11 +109,11 @@ app.use(cors(corsOptions));
 
 app.use('/rest', tokenValidation, routes());
 
-if(process.env.NODE_ENV==='dev'){
-  app.use('/dev', require('./devRoutes/routes.dev')());
-  app.use('/devUid', tokenValidation, require('./devRoutes/methodTesting.dev')());
-}else{
-  process.env.NODE_ENV='production';
+if (process.env.NODE_ENV === 'dev') {
+    app.use('/dev', require('./devRoutes/routes.dev')());
+    app.use('/devUid', tokenValidation, require('./devRoutes/methodTesting.dev')());
+} else {
+    process.env.NODE_ENV = 'production';
 }
 
 // if(process.env.NODE_ENV !== 'production'){
@@ -126,9 +126,6 @@ if(process.env.NODE_ENV==='dev'){
 //     })
 //   })
 // }
-
-
-
 
 
 console.log("process.env.NODE_ENV", process.env.NODE_ENV);

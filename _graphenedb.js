@@ -6,14 +6,14 @@ const neo4j = require('neo4j-driver').v1;
 const dbdev = require('./_secret').graphene;
 const url, usr, pwd;
 
-if(process.env.NODE_ENV === 'dev'){
-  url = dbdev.bolt;
-  usr = dbdev.username;
-  pwd = dbdev.password;
-}else{
-  url = process.env.GRAPHENEDB_BOLT_URL;
-  usr = process.env.GRAPHENEDB_BOLT_USER;
-  pwd = process.env.GRAPHENEDB_BOLT_PASSWORD;
+if (process.env.NODE_ENV === 'dev') {
+    url = dbdev.bolt;
+    usr = dbdev.username;
+    pwd = dbdev.password;
+} else {
+    url = process.env.GRAPHENEDB_BOLT_URL;
+    usr = process.env.GRAPHENEDB_BOLT_USER;
+    pwd = process.env.GRAPHENEDB_BOLT_PASSWORD;
 }
 
 const driver = neo4j.driver(url, neo4j.auth.basic(usr, pwd));

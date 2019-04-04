@@ -1,7 +1,7 @@
 module.exports.data = [
-  {item:"kitchen", trad:"cuisine"}
-  ,{item:"cat", trad:"chat"}
-  ,{item:"dog", trad:"chien"}
+    {item: "kitchen", trad: "cuisine"}
+    , {item: "cat", trad: "chat"}
+    , {item: "dog", trad: "chien"}
 ]
 // module.exports.dico_uuid = 'e4fe4e83-a9d1-4a58-8216-5fba6025419b';
 

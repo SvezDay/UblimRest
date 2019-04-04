@@ -1,24 +1,24 @@
 'use-strict';
 // CONFIG ----------------------------------------------------------------------
-const tokenGen = require('../_services/token.service');
-const driver = require('../../_dbconnect');
+const tokenGen = require('../../services/token.service');
+const driver = require('path').join(__dirname, '_graphenedb');
 // LIB ---------------------------------------------------------------------
 const parser = require('parse-neo4j');
 // SERVICES --------------------------------------------------------------------
-const utils = require('../_services/utils.service');
-const validator = require('../_services/validator.service');
+const utils = require('../../services/utils.service');
+const validator = require('../../services/validator.service');
 // REQUEST ---------------------------------------------------------------------
-const miscellaneousReq = require('../_services/miscellaneous.request');
+const miscellaneousReq = require('../../services/miscellaneous.request');
 // COMMON ----------------------------------------------------------------------
-const commonData = require('../_models/common.data');
+const commonData = require('../../models/common.data');
 // CONTROLLERS -----------------------------------------------------------------
 let deleteRecall = require('../games/recall/delete-recall.ctrl').deleteRecall;
 
-module.exports.deleteNote = (tx, note_uuid)=>{ // Input: tx, note_uuid  | Output: model
-  return new Promise((resolve, reject)=>{
-    let now = new Date().getTime();
+module.exports.deleteNote = (tx, note_uuid) => { // Input: tx, note_uuid  | Output: model
+    return new Promise((resolve, reject) => {
+        let now = new Date().getTime();
 
-    let one = `
+        let one = `
     MATCH (n:Note{uuid:$note_uuid})
     OPTIONAL MATCH p1=(n)-[:Manage]->(is:Index)
     WITH n, COUNT(is) AS countis
@@ -37,27 +37,36 @@ module.exports.deleteNote = (tx, note_uuid)=>{ // Input: tx, note_uuid  | Output
     DETACH DELETE n, ns
       `;
 
-    tx.run(one, {note_uuid:note_uuid, now:now}).then(parser.parse)
-    // .then(data => {console.log(' ========================== data: ', data); return data; })
-    .then(data=> resolve(data[0]) )
-    .catch(err =>{console.log(err); reject({status: err.status || 400, mess: err.mess || 'document/delete-note.ctrl.js/deleteNote'}); })
-  })
+        tx.run(one, {note_uuid: note_uuid, now: now}).then(parser.parse)
+        // .then(data => {console.log(' ========================== data: ', data); return data; })
+            .then(data => resolve(data[0]))
+            .catch(err => {
+                console.log(err);
+                reject({status: err.status || 400, mess: err.mess || 'document/delete-note.ctrl.js/deleteNote'});
+            })
+    })
 }
 
-module.exports.main = (req, res, next)=>{ // Input: note_uuid   |  Output: void
-  let ps = req.headers;
-  // let tx = driver.session().beginTransaction();
-  let session = driver.session();
-  let tx = session.beginTransaction();
-  ps.uid = req.decoded.uuid;
-  // console.log("ps", ps)
+module.exports.main = (req, res, next) => { // Input: note_uuid   |  Output: void
+    let ps = req.headers;
+    // let tx = driver.session().beginTransaction();
+    let session = driver.session();
+    let tx = session.beginTransaction();
+    ps.uid = req.decoded.uuid;
+    // console.log("ps", ps)
 
-  validator.uuid(ps.note_uuid, 'ps.note_uuid')
-  .then(()=> miscellaneousReq.access2Any(tx, ps.uid, ps.note_uuid) )
+    validator.uuid(ps.note_uuid, 'ps.note_uuid')
+        .then(() => miscellaneousReq.access2Any(tx, ps.uid, ps.note_uuid))
 
-  .then(()=>  this.deleteNote(tx, ps.note_uuid))
-  .then(()=> deleteRecall(tx, ps.note_uuid) )
+        .then(() => this.deleteNote(tx, ps.note_uuid))
+        .then(() => deleteRecall(tx, ps.note_uuid))
 
-  .then(data=> utils.commit(session, tx, res, ps.uid, data) )
-  .catch(err =>{console.log(err); utils.fail(session,{status: err.status || 400, mess: err.mess || 'document/delete-note.ctrl.js/main'}, res, tx)} )
+        .then(data => utils.commit(session, tx, res, ps.uid, data))
+        .catch(err => {
+            console.log(err);
+            utils.fail(session, {
+                status: err.status || 400,
+                mess: err.mess || 'document/delete-note.ctrl.js/main'
+            }, res, tx)
+        })
 };

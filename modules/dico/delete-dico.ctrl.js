@@ -1,15 +1,15 @@
 'use-strict';
 // CONFIG ----------------------------------------------------------------------
-const tokenGen = require('../_services/token.service');
-const driver = require('../../_dbconnect');
+const tokenGen = require('../../services/token.service');
+const driver = require('path').join(__dirname, '_graphenedb');
 // LIB ---------------------------------------------------------------------
 const parser = require('parse-neo4j');
 // SERVICES --------------------------------------------------------------------
-const utils = require('../_services/utils.service');
-const validator = require('../_services/validator.service');
+const utils = require('../../services/utils.service');
+const validator = require('../../services/validator.service');
 // REQUEST ---------------------------------------------------------------------
-const miscellaneousReq = require('../_services/miscellaneous.request');
-const descendantReq = require('../_services/descendant.request');
+const miscellaneousReq = require('../../services/miscellaneous.request');
+const descendantReq = require('../../services/descendant.request');
 // COMMON ----------------------------------------------------------------------
 // CONTROLLERS -----------------------------------------------------------------
 
@@ -17,10 +17,10 @@ const descendantReq = require('../_services/descendant.request');
 * Input: idx_uuid
 * Output: {result:true}
 */
-module.exports.deleteDico = (tx, idx_uuid)=>{
-  // DELETE DOC CONTAINER TITLE NODES
-  return new Promise((resolve, reject)=>{
-    const query = `
+module.exports.deleteDico = (tx, idx_uuid) => {
+    // DELETE DOC CONTAINER TITLE NODES
+    return new Promise((resolve, reject) => {
+        const query = `
     MATCH (idx:Index{uuid:$idx_uuid})
     OPTIONAL MATCH (top)-[:Manage]->(idx) WHERE top:Note OR top:Title OR top:Person
     OPTIONAL MATCH (idx)-[:Has|:Linked*]->(collection) WHERE collection:Title OR collection:Note
@@ -31,27 +31,35 @@ module.exports.deleteDico = (tx, idx_uuid)=>{
     FOREACH(b IN botlist | CREATE (top)-[:Manage]->(b) )
     RETURN {result:true} `;
 
-    return tx.run(query, {idx_uuid:idx_uuid}).then(parser.parse)
-    .then(result => { resolve(result) })
-    .catch(err =>{console.log(err); reject({status: err.status || 400, mess: err.mess || '_dico/delete-dico.ctrl.js/deleteDico'}); })
-  })
+        return tx.run(query, {idx_uuid: idx_uuid}).then(parser.parse)
+            .then(result => {
+                resolve(result)
+            })
+            .catch(err => {
+                console.log(err);
+                reject({status: err.status || 400, mess: err.mess || '_dico/delete-dico.ctrl.js/deleteDico'});
+            })
+    })
 }
 
 /*
 * Input: index
 * Output: true
 */
-module.exports.main = (req, res, next)=>{
-  let ps = req.headers;
-  let session = driver.session();
-  let tx = session.beginTransaction();
-  ps.uid = req.decoded.uuid;
-  // console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! delete dico ps',ps)
+module.exports.main = (req, res, next) => {
+    let ps = req.headers;
+    let session = driver.session();
+    let tx = session.beginTransaction();
+    ps.uid = req.decoded.uuid;
+    // console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! delete dico ps',ps)
 
-  validator.uuid(ps.idx_uuid)
-  .then(() => miscellaneousReq.access2Index(tx, ps.uid, ps.idx_uuid) )
-  .then(() => this.deleteDico(tx, ps.idx_uuid) )
-  .then(() => utils.commit(session, tx, res, ps.uid) )
-  .catch(err =>{console.log(err); utils.fail(session, {status: err.status || 400, mess: err.mess || 'dico/delete-dico.ctrl.js/main'}, res, tx)} )
+    validator.uuid(ps.idx_uuid)
+        .then(() => miscellaneousReq.access2Index(tx, ps.uid, ps.idx_uuid))
+        .then(() => this.deleteDico(tx, ps.idx_uuid))
+        .then(() => utils.commit(session, tx, res, ps.uid))
+        .catch(err => {
+            console.log(err);
+            utils.fail(session, {status: err.status || 400, mess: err.mess || 'dico/delete-dico.ctrl.js/main'}, res, tx)
+        })
 
 };
